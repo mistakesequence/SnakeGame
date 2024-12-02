@@ -8,8 +8,8 @@
 #include <algorithm>
 
 GameField::GameField(QWidget* parent)
-    : QWidget(parent), snake(10, 10), food(FIELD_WIDTH, FIELD_HEIGHT), gameOver(false), score(0),
-    isPaused(false), elapsedTime(0), currentLevel(1), applesEaten(0), snakeSpeed(140), showLevelText(false) {
+    : QWidget(parent), snake(10, 10), food(FIELD_WIDTH, FIELD_HEIGHT), specialFood(FIELD_WIDTH, FIELD_HEIGHT), gameOver(false), score(0),
+    isPaused(false), elapsedTime(0), currentLevel(1), applesEaten(0), snakeSpeed(140), showLevelText(false), specialFoodVisible(false) {
 
     setFixedSize(FIELD_WIDTH * TILE_SIZE, FIELD_HEIGHT * TILE_SIZE + 50);
 
@@ -25,7 +25,7 @@ GameField::GameField(QWidget* parent)
     connect(levelTextTimer, &QTimer::timeout, [this]() {
         showLevelText = false;
         update();
-        });
+    });
 
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, [this]() {
@@ -33,10 +33,18 @@ GameField::GameField(QWidget* parent)
             elapsedTime++;
             update();
         }
-        });
+    });
     gameTimer->start(1000);
 
     LoadLeaderboard();
+
+    specialFoodTimer = new QTimer(this);
+    connect(specialFoodTimer, &QTimer::timeout, [this]() {
+        specialFood.Respawn(FIELD_WIDTH, FIELD_HEIGHT);
+        specialFoodVisible = true;
+        update();
+        });
+    specialFoodTimer->start(30000); 
 }
 
 
@@ -79,6 +87,11 @@ void GameField::paintEvent(QPaintEvent* event) {
         painter.setPen(Qt::yellow);
         painter.setFont(QFont("Arial", 20, QFont::Bold));
         QString levelText = (currentLevel == maxLevel) ? "Final Level" : QString("Level %1").arg(currentLevel);
+
+        if (applesEaten == 0 && currentLevel == 1) {
+            levelText = "Levels Reset"; 
+        }
+
         painter.drawText(rect(), Qt::AlignCenter, levelText);
     }
 }
@@ -89,17 +102,17 @@ void GameField::keyPressEvent(QKeyEvent* event) {
         if (event->key() == Qt::Key_R) {
             snake = Snake(10, 10);
             food.Respawn(FIELD_WIDTH, FIELD_HEIGHT);
+            ResetSpecialFood();
             gameOver = false;
             isPaused = false;
             elapsedTime = 0;
             score = 0;
             currentLevel = 1;
             applesEaten = 0;
-            snakeSpeed = 140;
+            snakeSpeed = 150;
             timer->start(snakeSpeed);
             update();
-        }
-        else if (event->key() == Qt::Key_L) {
+        } else if (event->key() == Qt::Key_L) {
             ShowLeaderboard(); 
         }
         return;
@@ -127,7 +140,8 @@ void GameField::TogglePause() {
     isPaused = !isPaused;
     if (isPaused) {
         timer->stop();
-    }
+    } 
+    
     else {
         timer->start(snakeSpeed); 
     }
@@ -136,6 +150,8 @@ void GameField::TogglePause() {
 
 void GameField::UpdateGame() {
     if (gameOver || isPaused) {
+        timer->stop();
+        ResetSpecialFood();
         return;
     }
 
@@ -149,11 +165,28 @@ void GameField::UpdateGame() {
 
         if (applesEaten % 5 == 0 && currentLevel < maxLevel) {
             currentLevel++;
-            snakeSpeed -= 10; 
+            snakeSpeed -= 10;
             timer->start(snakeSpeed);
             showLevelText = true;
 
-            levelTextTimer->start(2000); 
+            levelTextTimer->start(2000);
+        }
+    }
+
+    if (specialFoodVisible && snake.GetX() == specialFood.GetX() && snake.GetY() == specialFood.GetY()) {
+        snake.Grow();
+        score += 3;
+        specialFoodVisible = false;
+        ResetLevelsAndSpeed();
+        showLevelText = true;
+        levelTextTimer->start(2000);
+    }
+
+    if (specialFoodVisible) {
+        pulseSize += 0.1 * pulseDirection;
+
+        if (pulseSize >= 1.2 || pulseSize <= 1.0) {
+            pulseDirection = -pulseDirection;
         }
     }
 
@@ -175,10 +208,25 @@ void GameField::UpdateGame() {
     if (snake.IsDead()) {
         gameOver = true;
         UpdateLeaderboard();
+        ResetSpecialFood();
         score = 0;
     }
 
     update();
+}
+
+void GameField::ResetSpecialFood() {
+    specialFoodVisible = false; 
+    specialFood.Respawn(FIELD_WIDTH, FIELD_HEIGHT); 
+    specialFoodTimer->stop(); 
+    specialFoodTimer->start(30000); 
+}
+
+void GameField::ResetLevelsAndSpeed() {
+    currentLevel = 1;          
+    snakeSpeed = 150;          
+    applesEaten = 0;           
+    timer->start(snakeSpeed);  
 }
 
 
@@ -200,13 +248,26 @@ void GameField::DrawSnake(QPainter& painter) {
 void GameField::DrawFood(QPainter& painter) {
     painter.setBrush(QBrush(QColor(250, 19, 19)));
     painter.drawEllipse(food.GetX() * TILE_SIZE, food.GetY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+    if (specialFoodVisible) {
+        painter.setBrush(QBrush(QColor(19, 19, 250)));
+        int foodSize = TILE_SIZE * pulseSize; 
+        painter.drawEllipse(specialFood.GetX() * TILE_SIZE - (foodSize - TILE_SIZE) / 2,
+            specialFood.GetY() * TILE_SIZE - (foodSize - TILE_SIZE) / 2, foodSize, foodSize);
+    }
 }
+
+
 
 void GameField::DrawBorders(QPainter& painter) {
     painter.setBrush(QBrush(Qt::darkGray));
     painter.drawRect(0, 0, FIELD_WIDTH * TILE_SIZE, 50);
     painter.drawRect(0, FIELD_HEIGHT * TILE_SIZE + 50, FIELD_WIDTH * TILE_SIZE, 50);
 }
+
+
+
+
 
 void GameField::DrawInfoInBorders(QPainter& painter) {
     painter.setPen(Qt::black);
@@ -264,7 +325,7 @@ void GameField::LoadLeaderboard() {
                 name = line.substr(6);
             }
             else if (line.find("Duration Time:") == 0) {
-                std::string timeStr = line.substr(15); 
+                std::string timeStr = line.substr(15);
                 int minutes = std::stoi(timeStr.substr(0, timeStr.find(":")));
                 int seconds = std::stoi(timeStr.substr(timeStr.find(":") + 1));
                 duration = minutes * 60 + seconds;
@@ -324,6 +385,7 @@ void GameField::UpdateLeaderboard() {
 
     SaveLeaderboard();
 }
+
 
 
 

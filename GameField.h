@@ -7,6 +7,7 @@
 #include "HelpField.h"
 #include <vector>
 #include <QString>
+#include "SpecialFood.h"
 
 class GameField : public QWidget {
     Q_OBJECT
@@ -43,6 +44,12 @@ private:
     Food food;
     bool gameOver;
 
+    SpecialFood specialFood;
+    QTimer* specialFoodTimer; 
+    bool specialFoodVisible; 
+    int pulseDirection = 1;  
+    double pulseSize = 1.0;
+
     int score;
     bool isPaused;
 
@@ -56,6 +63,9 @@ private:
     void DrawFood(QPainter& painter);
     void DrawBorders(QPainter& painter);
     void DrawInfoInBorders(QPainter& painter);
+
+    void ResetSpecialFood();
+    void ResetLevelsAndSpeed();
 
     void LoadLeaderboard();
     void ShowLeaderboard();

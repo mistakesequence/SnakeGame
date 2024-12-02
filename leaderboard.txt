@@ -1,20 +1,20 @@
-Score: 65
-Name: Valentyn
-Duration Time: 00:05
+Score: 50
+Name: George
+Duration Time: 02:07
 
 Score: 46
-Name: Valentyn
-Duration Time: 02:56
+Name: monochromka
+Duration Time: 02:19
 
-Score: 43
-Name: Valentyn
-Duration Time: 00:02
+Score: 44
+Name: monochromka
+Duration Time: 02:07
 
-Score: 36
-Name: Alex
-Duration Time: 01:46
+Score: 40
+Name: TNTUToper16
+Duration Time: 01:45
 
-Score: 26
-Name: Anthony
-Duration Time: 00:01
+Score: 34
+Name: boddolk
+Duration Time: 03:07
 

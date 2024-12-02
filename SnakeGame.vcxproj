@@ -95,16 +95,19 @@
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="HelpField.cpp" />
     <ClCompile Include="Snake.cpp" />
+    <ClCompile Include="SpecialFood.cpp" />
     <QtRcc Include="GameField.qrc" />
     <QtUic Include="GameField.ui" />
     <QtMoc Include="GameField.h" />
     <ClCompile Include="GameField.cpp" />
     <ClCompile Include="main.cpp" />
+    <None Include="ClassDiagram.cd" />
     <None Include="SnakeGame.ico" />
     <ResourceCompile Include="SnakeGame.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Food.h" />
+    <ClInclude Include="SpecialFood.h" />
     <QtMoc Include="HelpField.h" />
     <ClInclude Include="Snake.h" />
   </ItemGroup>

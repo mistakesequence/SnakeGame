@@ -55,9 +55,15 @@
     <ClCompile Include="HelpField.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SpecialFood.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Snake.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecialFood.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Food.h">
@@ -68,5 +74,8 @@
     <QtMoc Include="HelpField.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

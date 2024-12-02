@@ -1,12 +1,13 @@
+// Food.h
 #pragma once
 
 class Food {
 public:
-    Food(int fieldWidth, int fieldHeight);
-    void Respawn(int fieldWidth, int fieldHeight);
-    int GetX() const;
-    int GetY() const;
+    Food(int fieldWidth, int fieldHeight); 
+    virtual void Respawn(int fieldWidth, int fieldHeight); 
+    int GetX() const;  
+    int GetY() const;  
 
-private:
-    int x, y;
+protected:
+    int x, y;  
 };

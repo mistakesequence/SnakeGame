@@ -1,23 +1,20 @@
+// Food.cpp
 #include "Food.h"
-#include <cstdlib>  
+#include <cstdlib> 
 
-Food::Food(int fieldWidth, int fieldHeight)
-{
+Food::Food(int fieldWidth, int fieldHeight) {
     Respawn(fieldWidth, fieldHeight);
 }
 
-void Food::Respawn(int fieldWidth, int fieldHeight)
-{
+void Food::Respawn(int fieldWidth, int fieldHeight) {
     x = rand() % fieldWidth;
     y = rand() % fieldHeight;
 }
 
-int Food::GetX() const
-{
+int Food::GetX() const {
     return x;
 }
 
-int Food::GetY() const
-{
+int Food::GetY() const {
     return y;
 }
